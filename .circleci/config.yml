@@ -1,0 +1,39 @@
+version: 2.1
+
+workflows:
+    version: 2
+    
+    ios:
+        - build-and-test:
+            scheme: SBJson5_iOS
+            destination: platform=iOS Simulator,name=iPhone SE
+    macOS:
+        - build-and-test:
+            scheme: SBJson5_macOS
+            destination: platform=macOS,arch=x86_64
+
+jobs:
+    build-and-test:
+        parameters:
+            scheme:
+                type: string
+            destination:
+                type: string
+
+        macos:
+            xcode: "10.0.0"
+
+        steps:
+            - checkout
+            - run:
+                name: Run tests
+                command: >
+                    xcodebuild test
+                    -scheme <<parameters.scheme>>
+                    -destination "<<parameters.destination>>"
+                environment:
+                    GCC_INSTRUMENT_PROGRAM_FLOW_ARCS: YES
+                    GCC_GENERATE_TEST_COVERAGE_FILES: YES
+            - run: bash <(curl -s https://codecov.io/bash)
+        
+            
